@@ -1,5 +1,6 @@
 """Utilities"""
 import time
+import io
 import logging
 import os
 import random
@@ -40,21 +41,21 @@ def get_yaml(path):
     :arg path: The path to a YAML configuration file.
     :rtype: dict
     """
-    # Set the stage here to parse single scalar value environment vars from
+    # Set the stage here to parse yaml cómpotible environment vars from
     # the YAML file being read
-    single = re.compile(r'^\$\{(.*)\}$')
-    yaml.add_implicit_resolver("!single", single)
-    def single_constructor(loader, node):
+    envvarpattern = re.compile(r'^\$\{(.*)\}$')
+    yaml.add_implicit_resolver("!envar", envvarpattern)
+    def envar_constructor(loader, node):
         value = loader.construct_scalar(node)
-        proto = single.match(value).group(1)
+        proto = envvarpattern.match(value).group(1)
         default = None
         if len(proto.split(':')) > 1:
-            envvar, default = proto.split(':')
+            envvarkey, default = proto.split(':')
         else:
-            envvar = proto
-        return os.environ[envvar] if envvar in os.environ else default
+            envvarkey = proto
+        return yaml.safe_load(os.environ[envvarkey]) if envvarkey in os.environ else yaml.safe_load(default)
 
-    yaml.add_constructor('!single', single_constructor)
+    yaml.add_constructor('!envar', envar_constructor)
 
     try:
         return yaml.load(read_file(path), Loader=yaml.FullLoader)

@@ -1,6 +1,5 @@
 """Utilities"""
 import time
-import io
 import logging
 import os
 import random

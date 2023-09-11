@@ -40,7 +40,7 @@ def get_yaml(path):
     :arg path: The path to a YAML configuration file.
     :rtype: dict
     """
-    # Set the stage here to parse yaml cómpotible environment vars from
+    # Set the stage here to parse yaml compatible environment vars from
     # the YAML file being read
     envvarpattern = re.compile(r'^\$\{(.*)\}$')
     yaml.add_implicit_resolver("!envar", envvarpattern)
